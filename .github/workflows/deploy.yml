@@ -1,0 +1,32 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # GCP認証（SA鍵をGitHub Secretsから）
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # Cloud Run へデプロイ（--source でCloud Buildがビルド）
+      - name: Deploy to Cloud Run
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: |
+          gcloud run deploy fieldnotekeeper \
+            --source . \
+            --project fieldnotekeeper \
+            --region asia-northeast1 \
+            --allow-unauthenticated \
+            --set-env-vars "NOTION_TOKEN=${NOTION_TOKEN},NOTION_DATABASE_ID=${NOTION_DATABASE_ID},GOOGLE_CLOUD_PROJECT=fieldnotekeeper"

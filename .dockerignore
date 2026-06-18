@@ -1,0 +1,19 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.DS_Store
+
+# 秘密情報はイメージに含めない（環境変数/Secretで渡す）
+.env
+sa-key.json
+*-sa-key.json
+*service-account*.json
+client_secret*.json
+oauth_client.json
+token.json
+
+# 実験生データ・ローカル成果物
+runs/
+.pytest_cache/
+.streamlit/secrets.toml
