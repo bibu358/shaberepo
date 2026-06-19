@@ -91,7 +91,9 @@ if "rec" in st.session_state:
 
     if st.button("✅ 承認してNotionに保存", type="primary"):
         with st.spinner("保存中…（画像があればDriveにも）"):
-            if uploaded and os.environ.get("DRIVE_OAUTH_CLIENT"):
+            if uploaded and (
+                os.environ.get("DRIVE_OAUTH_CLIENT") or os.environ.get("DRIVE_OAUTH_TOKEN_JSON")
+            ):
                 from tools.drive_tools import create_record_folder, upload_image
                 yymmdd = rec.work_date[2:].replace("-", "") if rec.work_date else "nodate"
                 folder_id, folder_url = create_record_folder(f"{yymmdd}_{rec.title}")

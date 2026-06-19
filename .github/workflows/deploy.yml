@@ -23,10 +23,12 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          DRIVE_PARENT_FOLDER_ID: ${{ secrets.DRIVE_PARENT_FOLDER_ID }}
         run: |
           gcloud run deploy fieldnotekeeper \
             --source . \
             --project fieldnotekeeper \
             --region asia-northeast1 \
             --allow-unauthenticated \
-            --set-env-vars "NOTION_TOKEN=${NOTION_TOKEN},NOTION_DATABASE_ID=${NOTION_DATABASE_ID},GOOGLE_CLOUD_PROJECT=fieldnotekeeper"
+            --set-env-vars "NOTION_TOKEN=${NOTION_TOKEN},NOTION_DATABASE_ID=${NOTION_DATABASE_ID},GOOGLE_CLOUD_PROJECT=fieldnotekeeper,DRIVE_PARENT_FOLDER_ID=${DRIVE_PARENT_FOLDER_ID}" \
+            --set-secrets "DRIVE_OAUTH_TOKEN_JSON=drive-oauth-token:latest"

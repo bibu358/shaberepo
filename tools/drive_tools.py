@@ -5,14 +5,18 @@
 ユーザー本人のOAuth認証（本人の容量）を使う。
 ※組織のWorkspaceなら「共有ドライブ＋SA」の方が楽。
 
-必要な環境変数：
+環境変数（ローカル）：
 - DRIVE_OAUTH_CLIENT      : OAuthクライアントの credentials JSON パス
 - DRIVE_OAUTH_TOKEN       : 認証トークンの保存先（既定 token.json）
 - DRIVE_PARENT_FOLDER_ID  : 画像を入れる親フォルダID
 
-初回だけ `authorize_drive.py` を実行 → ブラウザ同意 → token.json 作成。
-以降は token.json を使う（同意不要、期限切れは自動更新）。
+環境変数（Cloud Run など）：
+- DRIVE_OAUTH_TOKEN_JSON  : token.json の「中身」（Secret Manager等で注入）。
+                            refresh_token を含むのでブラウザ無しで認証が回る。
+
+ローカル初回だけ `authorize_drive.py` を実行 → ブラウザ同意 → token.json 作成。
 """
+import json
 import os
 
 from google.auth.transport.requests import Request
@@ -26,21 +30,37 @@ FOLDER_MIME = "application/vnd.google-apps.folder"
 
 
 def get_credentials() -> Credentials:
-    """token.json があれば使い、無ければブラウザ同意で作成。期限切れは自動更新。"""
-    token_path = os.environ.get("DRIVE_OAUTH_TOKEN", "token.json")
+    """トークンを取得する。
+    - Cloud Run等：環境変数 DRIVE_OAUTH_TOKEN_JSON（token.jsonの中身）から読む。
+      refresh_token を含むのでブラウザ無しで自動更新できる（ファイルには書き戻さない）。
+    - ローカル：token.json ファイルを使い、無ければブラウザ同意で作成・保存。
+    """
+    token_json = os.environ.get("DRIVE_OAUTH_TOKEN_JSON")  # Cloud Run: 中身
+    token_path = os.environ.get("DRIVE_OAUTH_TOKEN", "token.json")  # ローカル: パス
+
     creds = None
-    if os.path.exists(token_path):
+    if token_json:
+        creds = Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
+    elif os.path.exists(token_path):
         creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            creds.refresh(Request())  # access_tokenをメモリ上で更新
+        elif token_json:
+            # Cloud Run等：対話フローは不可。トークンが無効なら再生成が必要
+            raise RuntimeError(
+                "Drive認証トークンが無効です。ローカルで token.json を再生成して Secret を更新してください。"
+            )
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 os.environ["DRIVE_OAUTH_CLIENT"], SCOPES
             )
             creds = flow.run_local_server(port=0)
-        with open(token_path, "w") as f:
-            f.write(creds.to_json())
+        # 書き戻しはローカル（ファイル運用）のときだけ。Cloud Runはファイルシステムが読み取り専用
+        if not token_json:
+            with open(token_path, "w") as f:
+                f.write(creds.to_json())
     return creds
 
 
