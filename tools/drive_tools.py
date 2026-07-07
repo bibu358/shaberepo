@@ -82,6 +82,16 @@ def create_record_folder(name: str) -> tuple[str, str]:
     return f["id"], f["webViewLink"]
 
 
+def create_subfolder(parent_id: str, name: str) -> tuple[str, str]:
+    """指定フォルダ直下にサブフォルダを作成。 (folder_id, folder_url) を返す"""
+    drive = _drive()
+    meta = {"name": name, "mimeType": FOLDER_MIME, "parents": [parent_id]}
+    f = drive.files().create(
+        body=meta, fields="id, webViewLink", supportsAllDrives=True
+    ).execute()
+    return f["id"], f["webViewLink"]
+
+
 def upload_image(folder_id: str, filename: str, data: bytes, mimetype: str) -> str:
     """画像を folder_id にアップロードし、閲覧URLを返す"""
     drive = _drive()
@@ -90,4 +100,5 @@ def upload_image(folder_id: str, filename: str, data: bytes, mimetype: str) -> s
     f = drive.files().create(
         body=meta, media_body=media, fields="id, webViewLink", supportsAllDrives=True
     ).execute()
+    # Driveはバックアップ保管（非公開）。Notion表示は別途 file_upload で直接アップロードする
     return f["webViewLink"]

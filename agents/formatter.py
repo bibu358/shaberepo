@@ -5,25 +5,9 @@ from google import genai
 from google.genai import types
 
 from core.schema import Record, FormatterOutput
+from core.prompts import DEFAULT_RULES, DEFAULT_SUMMARY_FORMAT
 
 MODEL = "gemini-2.5-flash"
-
-_RULES = """最優先（厳守）：
-- 事実を変えない（数値・結果・合否・状態を改変しない）
-- 推測で補完しない（書いていないことは書かない。不明なことは不明のまま）
-- 元の表現・用語・言い回しをできる限りそのまま使う（言い換え・脚色をしない）"""
-
-_SUMMARY_FORMAT = """summary は以下の構成で、各項目の中身を「インデントした箇条書き」で端的に書く
-（敬語なし・である調/体言止め。文章でつなげず、要点を箇条書きで並べる）：
-- 日付・題名：（1行で）
-- 背景・目的・やったこと：
-    - 箇条書き
-- 結果要約：
-    - 箇条書き
-- 考察・ネクストアクション：
-    - 箇条書き
-
-サマリは要点を端的に。詳しい内容は details 側に書く。事実は変えないが、自然な要約・整理はしてよい。"""
 
 PROMPT_TMPL = """あなたは実験・現場メモの整形担当です。箇条書きの走り書きメモから、後から読みやすい記録を作ります。
 
@@ -78,10 +62,16 @@ def _gen(prompt: str):
     return resp.parsed, resp.text
 
 
-def format_record(memo_lines: list[str], work_date=None, author=None):
-    """戻り値: (Record, meta)  meta = {model, prompt, raw_output}"""
+def format_record(memo_lines: list[str], work_date=None, author=None, rules=None, summary_format=None):
+    """戻り値: (Record, meta)  meta = {model, prompt, raw_output}
+    rules / summary_format を渡すとそれを使う（UIで調整した値）。無ければデフォルト。
+    """
     memo = "\n".join(memo_lines)
-    prompt = PROMPT_TMPL.format(rules=_RULES, summary_format=_SUMMARY_FORMAT, memo=memo)
+    prompt = PROMPT_TMPL.format(
+        rules=rules or DEFAULT_RULES,
+        summary_format=summary_format or DEFAULT_SUMMARY_FORMAT,
+        memo=memo,
+    )
     out, raw = _gen(prompt)
     rec = Record(
         title=out.title, summary=out.summary, sources=memo_lines, details=out.details,

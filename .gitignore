@@ -17,3 +17,6 @@ oauth_client.json
 token.json
 *-key.json
 github-deploy-key.json
+
+# Claude Code ローカル設定
+.claude/
