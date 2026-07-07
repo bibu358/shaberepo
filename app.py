@@ -198,7 +198,8 @@ def _toolbar_hit(x: int):
 def _collect_images(imgs) -> list:
     """②③に渡す画像データを組み立てる。
     - bytes/pil：表示解像度（AI入力・プレビュー用）
-    - full_bytes：**元解像度**に印を描いたJPEG（Notion/Drive保存用＝解像度を落とさない）
+    - full_bytes：**元解像度**に印を描いたJPEG（Notion保存用＝解像度を落とさない）
+    - raw_bytes：アップロードされた**生ファイルそのまま**（Drive保管用＝マークなし・無加工）
     """
     data = []
     for i, f in enumerate(imgs or []):
@@ -215,6 +216,7 @@ def _collect_images(imgs) -> list:
         data.append({
             "n": i + 1, "filename": f.name, "bytes": bio.getvalue(), "mime": "image/png",
             "full_bytes": biof.getvalue(), "full_mime": "image/jpeg",
+            "raw_bytes": f.getvalue(), "raw_mime": getattr(f, "type", None) or "image/jpeg",
             "marks": [{**m, "label": chr(64 + j)} for j, m in enumerate(marks, 1)],
             "pil": marked_disp,
         })
@@ -810,8 +812,10 @@ with col_prev:
                         folder_id, drive_url = create_record_folder(f"{yymmdd}_{out.title}")
                         img_fid, img_folder_url = create_subfolder(folder_id, "画像")
                         drive_links = [("画像フォルダ", img_folder_url)]  # ソースにはフォルダURLだけ載せる
-                        for name, blob, cap, mime in image_blobs:
-                            upload_image(img_fid, name, blob, mime)
+                        for im in images:  # Driveは生画像（マークなし・無加工）を保管
+                            upload_image(img_fid, im["filename"],
+                                         im.get("raw_bytes") or im["full_bytes"],
+                                         im.get("raw_mime") or im["full_mime"])
                     url = save_structured(out, st.session_state.transcript,
                                           work_date=str(work_date),
                                           image_blobs=image_blobs,
