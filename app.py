@@ -332,7 +332,7 @@ def _run_pipeline(imgs, tmpl, work_date, p: dict):
                                  else "✅ 記録作成を完了しました")
 
 
-st.set_page_config(page_title="しゃべれぽAI", page_icon="🧪", layout="wide",
+st.set_page_config(page_title="しゃべれぽAI", page_icon="🎙️", layout="wide",
                    initial_sidebar_state="collapsed")
 st.markdown("""
 <style>
