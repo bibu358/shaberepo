@@ -800,30 +800,40 @@ with col_prev:
                          im["full_mime"])
                         for im in images
                     ]
-                    # Driveはバックアップ保管（記録フォルダ内の「画像」フォルダへ）
+                    # Driveはバックアップ保管（記録フォルダ内の「画像」フォルダへ）。
+                    # ※あくまで副次的な保管。ここが失敗しても主機能（Notion保存）は必ず通す。
                     drive_url, drive_links = None, None
+                    drive_warn = None
                     drive_ok = (os.environ.get("DRIVE_OAUTH_CLIENT")
                                 or os.environ.get("DRIVE_OAUTH_TOKEN_JSON"))
                     if image_blobs and drive_ok:
-                        from tools.drive_tools import (create_record_folder,
-                                                       create_subfolder, upload_image)
-                        wd = str(work_date)
-                        yymmdd = wd[2:].replace("-", "") if wd else "nodate"
-                        folder_id, drive_url = create_record_folder(f"{yymmdd}_{out.title}")
-                        img_fid, img_folder_url = create_subfolder(folder_id, "画像")
-                        drive_links = [("画像フォルダ", img_folder_url)]  # ソースにはフォルダURLだけ載せる
-                        for im in images:  # Driveは生画像（マークなし・無加工）を保管
-                            upload_image(img_fid, im["filename"],
-                                         im.get("raw_bytes") or im["full_bytes"],
-                                         im.get("raw_mime") or im["full_mime"])
+                        try:
+                            from tools.drive_tools import (create_record_folder,
+                                                           create_subfolder, upload_image)
+                            wd = str(work_date)
+                            yymmdd = wd[2:].replace("-", "") if wd else "nodate"
+                            folder_id, drive_url = create_record_folder(f"{yymmdd}_{out.title}")
+                            img_fid, img_folder_url = create_subfolder(folder_id, "画像")
+                            drive_links = [("画像フォルダ", img_folder_url)]  # ソースにはフォルダURLだけ載せる
+                            for im in images:  # Driveは生画像（マークなし・無加工）を保管
+                                upload_image(img_fid, im["filename"],
+                                             im.get("raw_bytes") or im["full_bytes"],
+                                             im.get("raw_mime") or im["full_mime"])
+                        except Exception as e:  # 認証切れ等。Driveだけ諦めてNotionは続行
+                            drive_url, drive_links = None, None  # 途中失敗ならフォルダ参照も載せない
+                            drive_warn = str(e)
                     url = save_structured(out, st.session_state.transcript,
                                           work_date=str(work_date),
                                           image_blobs=image_blobs,
                                           drive_folder_url=drive_url,
                                           drive_image_links=drive_links)
                 st.session_state.saved_url = url
+                st.session_state.drive_warn = drive_warn  # Drive失敗時のみ後で表示
             if st.session_state.get("saved_url"):
                 st.success(f"保存しました 👉 {st.session_state.saved_url}")
+                if st.session_state.get("drive_warn"):
+                    st.warning("⚠️ Notionへの保存は完了しましたが、Google Driveへの画像バックアップは"
+                               "スキップされました（Drive認証エラー）。記録本体はNotionに保存済みです。")
 
         # ── 記録プレビュー（枠付き・常設）──
         with st.container(border=True):
