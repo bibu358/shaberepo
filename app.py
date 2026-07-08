@@ -557,7 +557,7 @@ with col_work:
 
         # ── STEP 2 ──
         with st.container(border=True):
-            _step_head("2️⃣ 画像をアップロードする（任意）")
+            _step_head("2️⃣ 画像をアップロードする（スキップ可）")
             imgs = st.file_uploader(
                 "現場・実験の写真（複数可）", accept_multiple_files=True,
                 type=["png", "jpg", "jpeg", "webp"], key="imgs_up",
@@ -568,8 +568,8 @@ with col_work:
         with st.container(border=True):
             _step_head("3️⃣ AIに音声で説明する")
             st.caption("""録音開始ボタンを押して、やったことや結果などについて話してください（録音済みの音声ファイルも使用可能です）。
-- URLなどのテキスト情報は、下の「テキスト情報」に貼り付け、その概要を説明してください。
-- 手順2でアップロードした画像は、下の「画像にマーク」に表示されます。「1枚目は〜」「3枚目のAは〜」のように、画像の枚数やマークを含めて説明してください。""")
+- 手順2でアップロードした画像は、下の「画像にマーク」に表示されます。「1枚目は〜」「3枚目のAは〜」のように、画像の枚数やマークを含めて説明してください。
+- URLなどのテキスト情報は、下の「テキスト情報」に貼り付け、その概要を説明してください。""")
             with st.expander("💡 話す時のコツ", expanded=False):
                 st.caption("""- 以下の内容を含めると、活用しやすい記録になります。台本としてご利用ください
   1. なぜやったか、何をやりたいか（背景・目的）
@@ -614,12 +614,7 @@ with col_work:
                     mime=getattr(audio, "type", None) or "audio/wav",
                 )
 
-            st.markdown("##### 📎 テキスト情報（任意）")
-            st.caption("URL・メモなど。音声で「このURLは〜」と説明すると適切な場所に配置されます")
-            st.text_area("テキスト情報", key="ref_text", height=68,
-                         disabled=locked, label_visibility="collapsed")
-
-            st.markdown("##### 🖍 画像にマーク（任意）")
+            st.markdown("##### 🖍 画像にマーク")
             if not imgs:
                 st.caption("STEP2で画像をアップロードすると、ここでマークをつけられます")
             else:
@@ -695,6 +690,11 @@ with col_work:
                                 st.rerun()
             if imgs and not HAS_COORDS:
                 st.warning("クリック注釈には streamlit-image-coordinates が必要です（pip install）")
+
+            st.markdown("##### 📎 テキスト情報")
+            st.caption("URL・メモなど。音声で「このURLは〜」と説明すると適切な場所に配置されます")
+            st.text_area("テキスト情報", key="ref_text", height=68,
+                         disabled=locked, label_visibility="collapsed")
 
         # ── STEP 4 ──
         with st.container(border=True):
