@@ -8,9 +8,22 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 
+_BUNDLED_FONT = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             "assets", "NotoSansJP-Regular.ttf")
+
+
 def _font(size: int):
-    for p in [
-        "assets/NotoSansJP-Regular.ttf",  # 本番同梱用（あれば優先）
+    """マーク用フォント。同梱の Noto Sans JP（可変フォント）を Bold(700) で使う。
+    ラベル A,B… が細くならないよう太字にし、Mac/Linux で同じ見た目に揃える。
+    """
+    try:  # 同梱の可変フォントを最優先。Bold軸を指定（本番Linuxで細くなる問題の対策）
+        f = ImageFont.truetype(_BUNDLED_FONT, size)
+        f.set_variation_by_axes([700])  # 700 = Bold
+        return f
+    except Exception:
+        pass
+    for p in [  # 同梱フォントが無い環境のフォールバック（できるだけ太字を選ぶ）
+        "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc",
         "/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc",
         "/System/Library/Fonts/Hiragino Sans GB.ttc",
         "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1200px;height:520px;}
+  body{background:#18181b;font-family:"Hiragino Sans",sans-serif;
+    display:flex;align-items:center;justify-content:center;gap:70px;}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:22px;}
+  .cap{color:#a1a1aa;font-size:17px;font-weight:600;}
+  .ico{width:230px;height:230px;border-radius:52px;box-shadow:0 20px 50px rgba(0,0,0,.5);}
+  .small{display:flex;gap:14px;}
+  .small .ico{width:64px;height:64px;border-radius:15px;box-shadow:none;}
+</style></head><body>
+
+  <!-- A: 吹き出し + 記録ライン + マークdrop -->
+  <div class="cell">
+    <svg class="ico" viewBox="0 0 100 100">
+      <defs><linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0e7490"/></linearGradient></defs>
+      <rect width="100" height="100" rx="24" fill="url(#gA)"/>
+      <path d="M26 30 h48 a6 6 0 0 1 6 6 v26 a6 6 0 0 1 -6 6 H44 l-12 11 v-11 h-6 a6 6 0 0 1 -6 -6 V36 a6 6 0 0 1 6 -6 Z" fill="#fff"/>
+      <rect x="33" y="41" width="34" height="4.6" rx="2.3" fill="#0e7490"/>
+      <rect x="33" y="51" width="24" height="4.6" rx="2.3" fill="#0e7490"/>
+      <circle cx="70" cy="34" r="9" fill="#f43f5e" stroke="#fff" stroke-width="3"/>
+    </svg>
+    <div class="cap">A：吹き出し＋記録＋マーク</div>
+    <div class="small">
+      <svg class="ico" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="url(#gA)"/>
+        <path d="M26 30 h48 a6 6 0 0 1 6 6 v26 a6 6 0 0 1 -6 6 H44 l-12 11 v-11 h-6 a6 6 0 0 1 -6 -6 V36 a6 6 0 0 1 6 -6 Z" fill="#fff"/>
+        <rect x="33" y="41" width="34" height="4.6" rx="2.3" fill="#0e7490"/><rect x="33" y="51" width="24" height="4.6" rx="2.3" fill="#0e7490"/>
+        <circle cx="70" cy="34" r="9" fill="#f43f5e" stroke="#fff" stroke-width="3"/></svg>
+    </div>
+  </div>
+
+  <!-- B: 吹き出し + 音波（しゃべる） -->
+  <div class="cell">
+    <svg class="ico" viewBox="0 0 100 100">
+      <defs><linearGradient id="gB" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#0e7490"/></linearGradient></defs>
+      <rect width="100" height="100" rx="24" fill="#0b0f14"/>
+      <path d="M24 28 h52 a7 7 0 0 1 7 7 v28 a7 7 0 0 1 -7 7 H45 l-14 12 v-12 h-7 a7 7 0 0 1 -7 -7 V35 a7 7 0 0 1 7 -7 Z" fill="url(#gB)"/>
+      <g stroke="#0b0f14" stroke-width="4.4" stroke-linecap="round">
+        <line x1="40" y1="42" x2="40" y2="56"/>
+        <line x1="50" y1="36" x2="50" y2="62"/>
+        <line x1="60" y1="44" x2="60" y2="54"/>
+      </g>
+    </svg>
+    <div class="cap">B：吹き出し＋音声波形</div>
+    <div class="small">
+      <svg class="ico" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#0b0f14"/>
+        <path d="M24 28 h52 a7 7 0 0 1 7 7 v28 a7 7 0 0 1 -7 7 H45 l-14 12 v-12 h-7 a7 7 0 0 1 -7 -7 V35 a7 7 0 0 1 7 -7 Z" fill="url(#gB)"/>
+        <g stroke="#0b0f14" stroke-width="4.4" stroke-linecap="round"><line x1="40" y1="42" x2="40" y2="56"/><line x1="50" y1="36" x2="50" y2="62"/><line x1="60" y1="44" x2="60" y2="54"/></g></svg>
+    </div>
+  </div>
+
+  <!-- C: 吹き出し + チェック（事実を保つ） -->
+  <div class="cell">
+    <svg class="ico" viewBox="0 0 100 100">
+      <defs><linearGradient id="gC" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0891b2"/></linearGradient></defs>
+      <rect width="100" height="100" rx="24" fill="url(#gC)"/>
+      <path d="M25 27 h50 a7 7 0 0 1 7 7 v27 a7 7 0 0 1 -7 7 H44 l-13 12 v-12 h-6 a7 7 0 0 1 -7 -7 V34 a7 7 0 0 1 7 -7 Z" fill="#fff"/>
+      <path d="M38 47 l8 8 l16 -17" fill="none" stroke="#0891b2" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="cap">C：吹き出し＋チェック</div>
+    <div class="small">
+      <svg class="ico" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="url(#gC)"/>
+        <path d="M25 27 h50 a7 7 0 0 1 7 7 v27 a7 7 0 0 1 -7 7 H44 l-13 12 v-12 h-6 a7 7 0 0 1 -7 -7 V34 a7 7 0 0 1 7 -7 Z" fill="#fff"/>
+        <path d="M38 47 l8 8 l16 -17" fill="none" stroke="#0891b2" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+</body></html>
