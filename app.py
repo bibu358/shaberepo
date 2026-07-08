@@ -345,7 +345,7 @@ div[data-testid="stExpander"] summary p {font-weight: 600;}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("### 🧪 しゃべれぽAI　"
+st.markdown("### しゃべれぽAI　"
             "<span style='font-size:0.85rem;color:#888;font-weight:400;'>"
             "喋るだけで、事実を保った実験・現場記録がNotionに残る</span>",
             unsafe_allow_html=True)
@@ -534,7 +534,7 @@ col_work, col_prev = st.columns(2, gap="medium")
 
 # ============ 左列：ユーザーによるインプット ============
 with col_work:
-    st.markdown("##### ✏️ ユーザーによるインプット")
+    st.markdown("##### ユーザーによるインプット")
     with st.container(height=760, key="col_left"):
 
         # ── ロック中の案内（理由＋解除手段を一番上に）──
@@ -739,7 +739,7 @@ with col_work:
 
 # ============ 右列：AIによる出力 ============
 with col_prev:
-    st.markdown("##### 📄 AIによる出力")
+    st.markdown("##### AIによる出力")
     with st.container(height=760, key="col_right"):
 
         # ── AI処理の進捗／完了メッセージ（囲み・見出しなしの1行）──

@@ -11,8 +11,7 @@
   <rect x="0" y="0" width="1680" height="990" fill="#FFFFFF"/>
 
   <!-- タイトル -->
-  <text x="40" y="46" font-size="26" font-weight="700" fill="#202124">しゃべれぽAI　システムアーキテクチャ</text>
-  <text x="40" y="72" font-size="13" fill="#5F6368">音声と画像から、実験や調査などの活動をNotionに記録化するAIエージェント</text>
+  <text x="40" y="52" font-size="26" font-weight="700" fill="#202124">しゃべれぽAI　システムアーキテクチャ</text>
 
   <!-- 4. 閲覧ルート（上部） -->
   <path d="M1415,206 L1415,100 L160,100 L160,186" fill="none" stroke="#9AA0A6" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arw)"/>
