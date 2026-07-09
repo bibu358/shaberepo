@@ -355,7 +355,7 @@ div[data-testid="stExpander"] summary p {font-weight: 600;}
 
 st.markdown("### しゃべれぽAI　"
             "<span style='font-size:0.85rem;color:#888;font-weight:400;'>"
-            "喋るだけで、事実を保った実験・現場記録がNotionに残る</span>",
+            "実験・調査などの活動を、音声と画像からNotionに記録化するAIエージェント</span>",
             unsafe_allow_html=True)
 
 # ---- 画面切替はサイドバー（タブの縦幅を節約）----
