@@ -2,6 +2,7 @@
 from google import genai
 from google.genai import types
 
+from core import usage
 from core.schema import VerifyResult
 
 MODEL = "gemini-2.5-flash"
@@ -133,4 +134,5 @@ def verify_record(transcript: str, draft_text: str, images: list = None,
             response_schema=VerifyResult,
         ),
     )
+    usage.record(MODEL, resp, "③検証")
     return resp.parsed

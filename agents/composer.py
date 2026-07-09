@@ -14,6 +14,7 @@ revise_structured：ユーザーの修正指示。指示の箇所だけ変更（
 from google import genai
 from google.genai import types
 
+from core import usage
 from core.schema import FormatOutput
 
 MODEL = "gemini-2.5-flash"
@@ -210,6 +211,7 @@ def compose_record(transcript: str, images: list, templates: dict,
             response_mime_type="application/json", response_schema=FormatOutput,
         ),
     )
+    usage.record(MODEL, resp, "②整形")
     return resp.parsed
 
 
@@ -228,6 +230,7 @@ def revise_structured(transcript: str, current: FormatOutput, instruction: str) 
             response_mime_type="application/json", response_schema=FormatOutput,
         ),
     )
+    usage.record(MODEL, resp, "②部分修正")
     return resp.parsed
 
 
@@ -250,4 +253,5 @@ def refine_structured(transcript: str, current: FormatOutput, issues) -> FormatO
             response_mime_type="application/json", response_schema=FormatOutput,
         ),
     )
+    usage.record(MODEL, resp, "④修正")
     return resp.parsed

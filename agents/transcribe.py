@@ -6,6 +6,7 @@ transcript は以後の全工程の唯一のソース（不変）。保存して
 from google import genai
 from google.genai import types
 
+from core import usage
 from core.schema import TranscriptOutput
 
 MODEL = "gemini-2.5-flash"
@@ -31,4 +32,5 @@ def transcribe(audio_bytes: bytes, mime: str) -> str:
             response_schema=TranscriptOutput,
         ),
     )
+    usage.record(MODEL, resp, "①文字起こし")
     return resp.parsed.transcript

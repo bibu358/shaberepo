@@ -40,6 +40,7 @@ from core.prompts import (load_prompts, save_prompts, DEFAULT_TEMPLATES,
                           TEMPLATE_LABELS, TEMPLATE_HELP)
 from core.draw import draw_user_marks, PALETTE
 from core.runlog import save_run
+from core import usage
 from tools.notion_tools import save_structured
 
 try:
@@ -258,6 +259,7 @@ def _run_pipeline(imgs, tmpl, work_date, p: dict):
     p: {"sources": [(bytes,mime)]|None, "extra_text": str, "extra_audio": (bytes,mime)|None,
         "from_reformat": bool}
     """
+    usage.reset()  # このAI実行のトークン集計を開始（各AIが usage.record する）
     # 追加指示（テキスト＋音声）
     extra = (p.get("extra_text") or "").strip()
     if p.get("extra_audio"):
@@ -305,6 +307,11 @@ def _run_pipeline(imgs, tmpl, work_date, p: dict):
                                work_date=str(work_date), extra_instruction=extra, ref_text=ref)
         fixed += len(facts)
 
+    # トークン消費・推定コストの集計（この記録作成で走った全AI呼び出しの合計）
+    usage_summary = usage.summary()
+    st.session_state.usage = usage_summary
+    st.session_state.usage_cum = usage.add(st.session_state.get("usage_cum"), usage_summary)
+
     # 実験ログ（プロンプト調整の記録。プロンプト・入力・出力・検証を1ファイルに）
     st.session_state.runlog_path = save_run({
         "stage": stage,
@@ -318,6 +325,7 @@ def _run_pipeline(imgs, tmpl, work_date, p: dict):
         "output": out.model_dump(),
         "verify": vr.model_dump(),
         "auto_fixed": fixed,
+        "usage": usage_summary,
     })
 
     # 修正なら直前の記録を保持（プレビューで差分ハイライトに使う）。新規録音なら差分なし
@@ -783,6 +791,23 @@ with col_prev:
                     for x in others:
                         sec = f"[{x.section}] " if getattr(x, "section", "") else ""
                         st.write(f"- [{x.type}] {sec}「{x.draft_says}」（{x.note}）")
+
+        # ── AIコスト（トークン消費・推定金額）──
+        if done and st.session_state.get("usage"):
+            u = st.session_state.usage
+            with st.expander(f"🧮 AIコスト（このAI実行 {u['calls']}回・推定 約¥{u['jpy']:.1f}）",
+                             expanded=False):
+                st.caption(f"このAI実行の合計トークン **{u['total']:,}**"
+                           f"（入力 {u['in']:,} / 出力 {u['out']:,}）・推定 **約¥{u['jpy']:.1f}**")
+                cum = st.session_state.get("usage_cum")
+                if cum and cum["calls"] > u["calls"]:
+                    st.caption(f"この画面を開いてからの累計 {cum['total']:,} トークン・"
+                               f"推定 約¥{cum['jpy']:.1f}")
+                for r in u.get("breakdown", []):
+                    st.caption(f"　• {r['label']}：{r['total']:,} tok"
+                               f"（入 {r['in']:,} / 出 {r['out']:,}）")
+                st.caption("※金額は概算（単価は変動）。正確な実費は GCP 請求で確認してください。"
+                           "音声入力は単価が高めのため、実費はやや高くなる場合があります。")
 
         # ── 保存（検証結果の下）──
         if done:
