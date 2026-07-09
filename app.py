@@ -741,8 +741,12 @@ with col_work:
         if done:
             _reformat_ui(disabled=busy)
 
-        # 作成開始・完了の直後は左列を最下部へ（STEP4のメッセージが画面外だと気づけない）
-        if busy or st.session_state.pop("scroll_left", False):
+        # 完了の直後だけ左列を最下部へ（STEP4の完了メッセージが画面外だと気づけない）。
+        # ※busy中はスクロールiframeを出さない：処理中に新identityのcomponentを描画すると、
+        #   そのマウント往復メッセージがパイプライン実行を割り込みで中断させ、部分修正が
+        #   ②修正の直後（③検証の手前）で止まるバグの原因になっていた。
+        #   スクロールはパイプライン完了後に立てる scroll_left フラグ経由でのみ行う。
+        if st.session_state.pop("scroll_left", False):
             _scroll_left_to_bottom()
 
 # ============ 右列：AIによる出力 ============
