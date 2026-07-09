@@ -792,23 +792,6 @@ with col_prev:
                         sec = f"[{x.section}] " if getattr(x, "section", "") else ""
                         st.write(f"- [{x.type}] {sec}「{x.draft_says}」（{x.note}）")
 
-        # ── AIコスト（トークン消費・推定金額）──
-        if done and st.session_state.get("usage"):
-            u = st.session_state.usage
-            with st.expander(f"🧮 AIコスト（このAI実行 {u['calls']}回・推定 約¥{u['jpy']:.1f}）",
-                             expanded=False):
-                st.caption(f"このAI実行の合計トークン **{u['total']:,}**"
-                           f"（入力 {u['in']:,} / 出力 {u['out']:,}）・推定 **約¥{u['jpy']:.1f}**")
-                cum = st.session_state.get("usage_cum")
-                if cum and cum["calls"] > u["calls"]:
-                    st.caption(f"この画面を開いてからの累計 {cum['total']:,} トークン・"
-                               f"推定 約¥{cum['jpy']:.1f}")
-                for r in u.get("breakdown", []):
-                    st.caption(f"　• {r['label']}：{r['total']:,} tok"
-                               f"（入 {r['in']:,} / 出 {r['out']:,}）")
-                st.caption("※金額は概算（単価は変動）。正確な実費は GCP 請求で確認してください。"
-                           "音声入力は単価が高めのため、実費はやや高くなる場合があります。")
-
         # ── 保存（検証結果の下）──
         if done:
             out = st.session_state.out
@@ -947,6 +930,23 @@ with col_prev:
                         st.image(_preview_img(by_n[n]["pil"]), caption=cap)
                 with st.expander("📄 ソース（文字起こし全文・Notionではトグル格納）"):
                     st.text(st.session_state.transcript)
+
+        # ── AIコスト（トークン消費・推定金額。記録プレビューの下）──
+        if done and st.session_state.get("usage"):
+            u = st.session_state.usage
+            with st.expander(f"🧮 AIコスト（このAI実行 {u['calls']}回・推定 約¥{u['jpy']:.1f}）",
+                             expanded=False):
+                st.caption(f"このAI実行の合計トークン **{u['total']:,}**"
+                           f"（入力 {u['in']:,} / 出力 {u['out']:,}）・推定 **約¥{u['jpy']:.1f}**")
+                cum = st.session_state.get("usage_cum")
+                if cum and cum["calls"] > u["calls"]:
+                    st.caption(f"この画面を開いてからの累計 {cum['total']:,} トークン・"
+                               f"推定 約¥{cum['jpy']:.1f}")
+                for r in u.get("breakdown", []):
+                    st.caption(f"　• {r['label']}：{r['total']:,} tok"
+                               f"（入 {r['in']:,} / 出 {r['out']:,}）")
+                st.caption("※金額は概算（単価は変動）。正確な実費は GCP 請求で確認してください。"
+                           "音声入力は単価が高めのため、実費はやや高くなる場合があります。")
 
 # ---- 予約されたAI処理を実行（右列まで描画し終えてから実行。進捗は「AI処理状況」へ）----
 if st.session_state.get("pending"):
