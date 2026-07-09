@@ -46,13 +46,18 @@ def get_credentials() -> Credentials:
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())  # access_tokenをメモリ上で更新
-        elif token_json:
-            # Cloud Run等：対話フローは不可。トークンが無効なら再生成が必要
-            raise RuntimeError(
-                "Drive認証トークンが無効です。ローカルで token.json を再生成して Secret を更新してください。"
-            )
-        else:
+            try:
+                creds.refresh(Request())  # access_tokenをメモリ上で更新
+            except Exception:
+                # refresh_token が失効・取り消し済み。ローカルならブラウザ再認証へ
+                # フォールバック（Cloud Runは下の RuntimeError で明示エラー）
+                creds = None
+        if not creds or not creds.valid:
+            if token_json:
+                # Cloud Run等：対話フローは不可。トークンが無効なら再生成が必要
+                raise RuntimeError(
+                    "Drive認証トークンが無効です。ローカルで token.json を再生成して Secret を更新してください。"
+                )
             flow = InstalledAppFlow.from_client_secrets_file(
                 os.environ["DRIVE_OAUTH_CLIENT"], SCOPES
             )
