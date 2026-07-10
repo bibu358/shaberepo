@@ -235,23 +235,41 @@ def _caption_text(fmt: str, n: int, desc: str, filename: str) -> str:
 
 
 def _prompt_diff_md(old: str, new: str) -> str:
-    """プロンプト変更案の行単位差分（🔴削除・🟢追加）をmarkdownで返す"""
-    o, n = old.split("\n"), new.split("\n")
+    """プロンプト変更案の差分（🔴削除・🟢追加）をmarkdownで返す。
+    **文字単位**で比較する：修正AIは改行を潰した全文を返すことがあり、
+    行単位だと一致行が0になって全文が削除+追加になるため。
+    """
+    def disp(text):  # 行頭の "- " はmarkdownのリスト化を避けて表示用に置換
+        return "\n".join(l.replace("- ", "– ", 1) if l.lstrip().startswith("- ") else l
+                         for l in text.split("\n"))
 
-    def disp(line):  # 行頭の "- " はリスト化を避けて表示用に置換
-        return line.replace("- ", "– ", 1) if line.lstrip().startswith("- ") else line
+    old, new = disp(old), disp(new)
+    ops = difflib.SequenceMatcher(None, old, new, autojunk=False).get_opcodes()
+    # 変更に挟まれた3文字以下の一致は変更に均す（opcodesでequalは隣接しないため、
+    # 内側のequal＝両隣が変更。細切れの色分け断片化を防ぐ）
+    ops = [("replace", i1, i2, j1, j2)
+           if (op == "equal" and i2 - i1 <= 3 and "\n" not in old[i1:i2]
+               and 0 < k < len(ops) - 1) else (op, i1, i2, j1, j2)
+           for k, (op, i1, i2, j1, j2) in enumerate(ops)]
 
-    sm = difflib.SequenceMatcher(None, o, n)
-    lines = []
-    for op, i1, i2, j1, j2 in sm.get_opcodes():
-        if op == "equal":
-            lines += [disp(l) for l in n[j1:j2]]
-        else:
-            if op in ("replace", "delete"):
-                lines += [f":red[~~{disp(l)}~~]" for l in o[i1:i2] if l.strip()]
-            if op in ("replace", "insert"):
-                lines += [f":green-background[{disp(l)}]" for l in n[j1:j2] if l.strip()]
-    return "  \n".join(lines)
+    out = []
+    for op, i1, i2, j1, j2 in ops:
+        spans = ([("eq", new[j1:j2])] if op == "equal" else
+                 ([("del", old[i1:i2])] if op in ("replace", "delete") else []) +
+                 ([("add", new[j1:j2])] if op in ("replace", "insert") else []))
+        for kind, text in spans:
+            for k, seg in enumerate(text.split("\n")):  # 色付けは改行を跨げないので行ごと
+                if k > 0:
+                    out.append("\n")
+                if not seg:
+                    continue
+                if seg.strip() == "" or kind == "eq":  # 空白だけの差は色を付けない
+                    out.append(seg if kind != "del" else "")
+                elif kind == "del":
+                    out.append(f":red[~~{seg}~~]")
+                else:
+                    out.append(f":green-background[{seg}]")
+    return "  \n".join("".join(out).split("\n"))  # markdownの強制改行に変換
 
 
 def _run_pipeline(imgs, tmpl, work_date, p: dict):
